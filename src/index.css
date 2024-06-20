@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  min-height: 100vh;
+  letter-spacing: .35px;
+}
+.bg-theme {
+  background-color: #2B6FFF !important;
+}
+.text-theme {
+  color: #2B6FFF !important;
+}
+.bg-theme2 {
+  background-color: #3C4A65 !important;
+}
+.text-theme2 {
+  color: #3C4A65 !important;
+}
+
+.menu li {
+  @apply rounded-md focus:bg-base-100
+}
