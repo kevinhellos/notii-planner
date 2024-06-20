@@ -8,5 +8,9 @@ Notii Planner is the all-in-one daily planner app designed to help you stay orga
 Notii Planner is available on web, mobile and desktop platforms, allowing you to access your planner from anywhere, at any time. 
 Thanks to the technology of PWA (Progressive Web App).
 
-## Credits
+## Upcoming updates
+- Edit task title
+- Add task description
+
+### Credits
 Notii Planner logo from: https://www.flaticon.com/free-icons/note
