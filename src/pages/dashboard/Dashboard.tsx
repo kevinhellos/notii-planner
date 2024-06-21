@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { useEffect, useRef, useState } from "react";
 import Sidebar from "../../component/Sidebar";
 import { useAddNewTask } from "../../hooks/tasks/useAddNewTask";
@@ -7,12 +9,20 @@ import { useDeleteTask } from "../../hooks/tasks/useDeleteTask";
 import { useLocation } from "react-router-dom";
 import { auth } from "../../config/firebase";
 import { signOut } from "firebase/auth";
+import toast, { Toaster } from "react-hot-toast";
 
 const Dashboard = () => {
 
     function capitalizeFirstLetter(str: string) {
         if (!str) return str;
         return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function resetAddTask() {
+        setNewTaskTitle("");
+        setNewTaskDescription("");
+        setNewTaskCategory("uncategorized");
+        setHasError(false);
     }
 
     const addTaskModal = useRef<HTMLDialogElement>(null);
@@ -22,7 +32,7 @@ const Dashboard = () => {
     const deleteTask = useDeleteTask;
 
     const [newTaskTitle, setNewTaskTitle] = useState<string>("");
-    const [newTaskDescription, setNewTaskDescription] = useState<string>("-"); // Since we can view task description yet, set default description to -
+    const [newTaskDescription, setNewTaskDescription] = useState<string>("");
     const [newTaskCategory, setNewTaskCategory] = useState<string>("uncategorized");
     const [hasError, setHasError] = useState<boolean>(false);
 
@@ -31,9 +41,11 @@ const Dashboard = () => {
             try {
                 const newTaskId = await addNewTask(newTaskTitle, newTaskDescription, newTaskCategory);
                 if (newTaskId) {
-                    setNewTaskTitle("");
-                    setNewTaskDescription("");
-                    setHasError(false);
+                    resetAddTask();
+                    // setNewTaskTitle("");
+                    // setNewTaskDescription("");
+                    // setNewTaskCategory("uncategorized");
+                    // setHasError(false);
                     addTaskModal?.current?.close();
                     getAllTasksData();
                 }
@@ -72,7 +84,7 @@ const Dashboard = () => {
     useEffect(() => {
         const customFilter = new URLSearchParams(location.search).get("filter");
         if (customFilter !== null) {
-            // console.log("Custom filter exists..." + customFilter);
+            // fix the error below
             setFilterApplied(customFilter);
             getAllTasksData(customFilter);
             if (customFilter === "") {
@@ -80,7 +92,6 @@ const Dashboard = () => {
             }
         }
         else {
-            // console.log("Custom filter DOES NOT EXISTS");
             getAllTasksData();
         }
     }, []);
@@ -101,6 +112,7 @@ const Dashboard = () => {
     
     return (
         <>
+            <Toaster/>
             <div className="flex justify-center min-h-screen ">
                 <div className="w-full">
                     <div className="drawer lg:drawer-open">
@@ -138,7 +150,6 @@ const Dashboard = () => {
                                     </div>
                                 </div>
                             </div>
-
                             
                             <div className="p-6 px-4 lg:px-10 mt-[-20px]">
                                 <h1 className="text-[1.675rem] font-medium">
@@ -157,6 +168,7 @@ const Dashboard = () => {
                                 <div className="mt-5">
                                     {allTasks.map((task, index) => (
                                         <div key={index} className="flex ml-[-25px]">
+                                            
                                             <div className="dropdown">
                                                 <div tabIndex={0} role="button" 
                                                     className="btn btn-sm mt-[-10px] mr-2 rounded-md bg-white border-none shadow-none px-[0.90rem] hover:bg-slate-100">
@@ -164,19 +176,19 @@ const Dashboard = () => {
                                                 </div>
                                                 <ul tabIndex={0} className="dropdown-content rounded-lg z-[1] menu p-1 shadow bg-base-100 w-52">
                                                     {/* <li>
-                                                        <a href="">
+                                                        <a className="hover:bg-gray-100">
                                                             <i className="fi fi-rr-pencil mr-2"></i>
                                                             Edit
                                                         </a>
                                                     </li>
                                                     <li>
-                                                        <a className="hover:text-blue-600">
+                                                        <a className="hover:bg-gray-100 hover:text-blue-600">
                                                             <i className="fi fi-rs-move-to-folder ml-[-2px] mr-2"></i>
                                                             Move
                                                         </a>
                                                     </li> */}
                                                     <li>
-                                                        <a className="hover:bg-slate-50 hover:text-red-600 p-2 px-3"
+                                                        <a className="hover:bg-gray-100 hover:text-red-600 p-2 px-3"
                                                             onClick={() => {
                                                                 const confirmDeletion = window.confirm(`Delete ${task.name} ?`);
                                                                 if (confirmDeletion) {
@@ -200,10 +212,14 @@ const Dashboard = () => {
                                                 onClick={() => toggleTaskStatus(task.id, task.category)}
                                             /> 
                                             <span 
-                                                className={`flex cursor-pointer mb-5
+                                                className={`flex cursor-pointer mb-5 tooltip tooltip-bottom
                                                 ${task.category == "completed" ? "line-through text-gray-400" :""}`} 
+                                                data-tip={task.description}
                                             >
-                                                {task.name}
+                                                {task.name} 
+                                                {task.category === "today" && 
+                                                    <div className="badge ms-3 mt-1 bg-yellow-400 border-none text-black text-xs">Due today</div>
+                                                }
                                             </span>
                                         </div>
                                     ))}
@@ -213,32 +229,35 @@ const Dashboard = () => {
 
                                 <dialog ref={addTaskModal} className="modal">
                                     <div className="modal-box rounded-md p-10">
+                                        <h3 className="mb-5 text-xl font-medium">Add a new task</h3>
                                         <label htmlFor="name" className="text-gray-500 text-sm">Task name</label>
                                         <input 
                                             name="name" 
                                             type="text" 
-                                            className="input w-full rounded-md focus:outline-gray-800 block bg-gray-50 mb-5" 
+                                            className="input w-full rounded-md focus:outline-gray-800 block bg-gray-50 mb-5 mt-2" 
                                             placeholder="Task name" 
                                             value={newTaskTitle}
                                             onChange={(e) => setNewTaskTitle(e.target.value)}
                                         />
                                         
-                                        {/* <label htmlFor="description" className="text-gray-500 text-sm">Description</label>
+                                        <label htmlFor="description" className="text-gray-500 text-sm">Description</label>
                                         <textarea 
                                             name="description" 
-                                            className="textarea w-full rounded-md focus:outline-gray-800 block bg-gray-50 mb-5" 
+                                            className="textarea w-full rounded-md focus:outline-gray-800 block bg-gray-50 mb-5 mt-2" 
                                             placeholder="Description"
                                             value={newTaskDescription}
                                             onChange={(e) => setNewTaskDescription(e.target.value)}
-                                        ></textarea> */}
+                                        ></textarea>
 
                                         <label htmlFor="category" className="text-gray-500 text-sm">Category</label>
                                         <select 
                                             name="category"  
-                                            className="select w-full rounded-md focus:outline-gray-800 bg-gray-50"
+                                            className="select w-full rounded-md focus:outline-gray-800 bg-gray-50 mt-2"
                                             onChange={(e) => setNewTaskCategory(e.target.value)}
+                                            value={newTaskCategory}
                                         >
                                             <option value={"uncategorized"}>Uncategorized</option>
+                                            <option value={"today"}>oday</option>
                                             <option value={"important"}>Important</option>
                                             <option value={"archived"}>Archived</option>
                                         </select>
@@ -254,7 +273,7 @@ const Dashboard = () => {
                                                         strokeWidth="2" 
                                                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                                 </svg>
-                                                <span>Please fill in all fields to continue</span>
+                                                <span className="text-sm">Please ensure all fields are filled up to continue</span>
                                             </div>
                                         }
 
@@ -264,6 +283,7 @@ const Dashboard = () => {
                                                     className="btn btn-sm bg-white hover:bg-slate-50 rounded-md font-medium mr-2 shadow-none"
                                                     onClick={() => {
                                                         setHasError(false);
+                                                        resetAddTask();
                                                     }}
                                                     >
                                                         Cancel

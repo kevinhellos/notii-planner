@@ -13,4 +13,4 @@ Thanks to the technology of PWA (Progressive Web App).
 - Add task description
 
 ### Credits
-Notii Planner logo from: https://www.flaticon.com/free-icons/note
+Notii Planner logo from: https://www.flaticon.com/free-icons/calendar
