@@ -11,8 +11,11 @@ Notii Planner is available on web, mobile and desktop platforms, allowing you to
 Thanks to the technology of PWA (Progressive Web App).
 
 ## Upcoming updates
+- ✅ Add task description
 - Edit task title
-- Add task description
+- Edit task description
+- Edit task category
+- Custom coloured labels
 
 ### Credits
 Notii Planner logo from: https://www.flaticon.com/free-icons/calendar
