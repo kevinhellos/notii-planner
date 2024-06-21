@@ -3,6 +3,7 @@ import ProtectedRoute from "./component/auth/ProtectedRoute";
 import Login from "./pages/login/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Forbidden from "./pages/forbidden/Forbidden";
+import Landing from "./pages/landing/Landing";
 
 const App = () => {
   return (
@@ -11,7 +12,7 @@ const App = () => {
         <Switch>
 
           <Route exact path="/">
-            <Login/>
+            <Landing/>
           </Route>
 
           <Route exact path="/login">

@@ -9,7 +9,6 @@ import { useDeleteTask } from "../../hooks/tasks/useDeleteTask";
 import { useLocation } from "react-router-dom";
 import { auth } from "../../config/firebase";
 import { signOut } from "firebase/auth";
-import toast, { Toaster } from "react-hot-toast";
 
 const Dashboard = () => {
 
@@ -112,7 +111,6 @@ const Dashboard = () => {
     
     return (
         <>
-            <Toaster/>
             <div className="flex justify-center min-h-screen ">
                 <div className="w-full">
                     <div className="drawer lg:drawer-open">
@@ -220,6 +218,9 @@ const Dashboard = () => {
                                                 {task.category === "today" && 
                                                     <div className="badge ms-3 mt-1 bg-yellow-400 border-none text-black text-xs">Due today</div>
                                                 }
+                                                {task.category === "important" && 
+                                                    <div className="badge ms-3 mt-1 bg-red-500 border-none text-white text-xs">Important</div>
+                                                }
                                             </span>
                                         </div>
                                     ))}
@@ -257,7 +258,7 @@ const Dashboard = () => {
                                             value={newTaskCategory}
                                         >
                                             <option value={"uncategorized"}>Uncategorized</option>
-                                            <option value={"today"}>oday</option>
+                                            <option value={"today"}>Today</option>
                                             <option value={"important"}>Important</option>
                                             <option value={"archived"}>Archived</option>
                                         </select>
