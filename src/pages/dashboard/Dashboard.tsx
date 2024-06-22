@@ -91,7 +91,7 @@ const Dashboard = () => {
                                     Add task
                                 </button>
 
-                                <button className="btn btn-sm hover:bg-gray-100 btn-ghost shadow-xs font-medium mt-3 rounded-md ms-3 px-[0.55rem]"
+                                <button className="btn btn-sm hover:bg-gray-100 btn-ghost shadow-xs font-medium mt-3 rounded-md ms-3 px-[0.55rem] hidden"
                                     onClick={() => refreshAllTasks()}
                                     ref={refreshTaskButton}
                                 >
