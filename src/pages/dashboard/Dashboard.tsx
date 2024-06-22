@@ -1,65 +1,20 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { useEffect, useRef, useState } from "react";
 import Sidebar from "../../component/Sidebar";
-import { useAddNewTask } from "../../hooks/tasks/useAddNewTask";
 import useGetAllTasks, { TaskProps } from "../../hooks/tasks/useGetAllTasks";
 import useUpdateTask from "../../hooks/tasks/useUpdateTask";
 import { useDeleteTask } from "../../hooks/tasks/useDeleteTask";
-import { useLocation } from "react-router-dom";
-import { auth } from "../../config/firebase";
-import { signOut } from "firebase/auth";
+import { useHistory, useLocation } from "react-router-dom";
+import { capitalizeFirstLetter } from "../../utils/utils";
+import Navbar from "../../component/shared/Navbar";
+import AddTaskModal from "./AddTaskModal";
 
 const Dashboard = () => {
 
-    function capitalizeFirstLetter(str: string) {
-        if (!str) return str;
-        return str.charAt(0).toUpperCase() + str.slice(1);
-    }
-
-    function resetAddTask() {
-        setNewTaskTitle("");
-        setNewTaskDescription("");
-        setNewTaskCategory("uncategorized");
-        setHasError(false);
-    }
-
-    const addTaskModal = useRef<HTMLDialogElement>(null);
-
-    const addNewTask = useAddNewTask;
     const updateTask = useUpdateTask;
     const deleteTask = useDeleteTask;
 
-    const [newTaskTitle, setNewTaskTitle] = useState<string>("");
-    const [newTaskDescription, setNewTaskDescription] = useState<string>("");
-    const [newTaskCategory, setNewTaskCategory] = useState<string>("uncategorized");
-    const [hasError, setHasError] = useState<boolean>(false);
-
-    async function addNewTaskData() {
-        if (String(newTaskTitle).trim() !== "" && String(newTaskDescription).trim() !== "") {
-            try {
-                const newTaskId = await addNewTask(newTaskTitle, newTaskDescription, newTaskCategory);
-                if (newTaskId) {
-                    resetAddTask();
-                    // setNewTaskTitle("");
-                    // setNewTaskDescription("");
-                    // setNewTaskCategory("uncategorized");
-                    // setHasError(false);
-                    addTaskModal?.current?.close();
-                    getAllTasksData();
-                }
-            } catch (error: unknown) {
-                console.error(error);
-            }
-        }
-        else {
-            setHasError(true);
-            // toast.error("Please fill in all fields !");
-            // alert("Please fill all the fields");
-        }
-    }
-
     const location = useLocation();
+    const page = useHistory();
 
     const getAllTasks = useGetAllTasks;
     const [allTasks, setAllTasks] = useState<TaskProps[]>([]);
@@ -108,46 +63,21 @@ const Dashboard = () => {
             console.error("Error updating task category: ", error);
         }
     };
+
+    const refreshTaskButton = useRef<HTMLButtonElement>(null);
+    const refreshAllTasks = () => {
+        getAllTasksData();
+    };
     
     return (
         <>
-            <div className="flex justify-center min-h-screen ">
+            <div className="flex justify-center min-h-screen">
                 <div className="w-full">
                     <div className="drawer lg:drawer-open">
                         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
                         <div className="drawer-content px-3">
                             
-                            <div className="navbar bg-base-100">
-                                <div className="mt-3 ml-[-11px]">
-                                    <label 
-                                        htmlFor="my-drawer-2" 
-                                        className="btn btn-ghost drawer-button lg:hidden lg:float-start text-lg rounded-md hover:bg-slate-50 ml-5 shadow-none">
-                                        <i className="fi fi-rr-sidebar mt-1"></i>
-                                    </label>
-                                </div>
-                                <div className="flex-1 gap-2 justify-end">
-                                    <div className="dropdown dropdown-end">
-                                    <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-                                        <div className="w-10 rounded-full">
-                                        <img 
-                                            alt="Avatar URL" 
-                                            src={String(auth?.currentUser?.photoURL)} 
-                                        />
-                                        </div>
-                                    </div>
-                                    <ul tabIndex={0} className="mt-3 z-[1] p-1 shadow menu menu-md dropdown-content bg-base-100 rounded-md w-52">
-                                        <li>
-                                            <a className="bg-white hover:bg-slate-50 rounded-xs flex text-red-600" onClick={() => {
-                                                signOut(auth);
-                                            }}>
-                                                <i className="fi fi-rr-sign-out-alt mt-1 mr-2"></i>
-                                                Logout
-                                            </a>
-                                        </li>
-                                    </ul>
-                                    </div>
-                                </div>
-                            </div>
+                            <Navbar/>
                             
                             <div className="p-6 px-4 lg:px-10 mt-[-20px]">
                                 <h1 className="text-[1.675rem] font-medium">
@@ -155,12 +85,17 @@ const Dashboard = () => {
                                 </h1>
 
                                 <button className="btn btn-sm hover:bg-gray-100 btn-ghost shadow-xs border-gray-200 font-medium mt-3 rounded-md"
-                                    onClick={() => {
-                                        addTaskModal?.current?.showModal();
-                                    }}
+                                    onClick={() => page.push("/dashboard?modal=true")}
                                 >
                                     <i className="fi fi-rr-plus text-xs mt-1"></i>
                                     Add task
+                                </button>
+
+                                <button className="btn btn-sm hover:bg-gray-100 btn-ghost shadow-xs font-medium mt-3 rounded-md ms-3 px-[0.55rem]"
+                                    onClick={() => refreshAllTasks()}
+                                    ref={refreshTaskButton}
+                                >
+                                    <i className="fi fi-rr-refresh text-xs mt-1"></i>
                                 </button>
                                 
                                 <div className="mt-5">
@@ -173,18 +108,6 @@ const Dashboard = () => {
                                                     <i className="fas fa-ellipsis-vertical"></i>
                                                 </div>
                                                 <ul tabIndex={0} className="dropdown-content rounded-lg z-[1] menu p-1 shadow bg-base-100 w-52">
-                                                    {/* <li>
-                                                        <a className="hover:bg-gray-100">
-                                                            <i className="fi fi-rr-pencil mr-2"></i>
-                                                            Edit
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a className="hover:bg-gray-100 hover:text-blue-600">
-                                                            <i className="fi fi-rs-move-to-folder ml-[-2px] mr-2"></i>
-                                                            Move
-                                                        </a>
-                                                    </li> */}
                                                     <li>
                                                         <a className="hover:bg-gray-100 hover:text-red-600 p-2 px-3"
                                                             onClick={() => {
@@ -228,83 +151,13 @@ const Dashboard = () => {
                                     {allTasks.length === 0 && <div className="text-gray-400">You have no {filterApplied == "allTasks" ? "tasks" : `${filterApplied} tasks`}</div>}
                                 </div>
 
-                                <dialog ref={addTaskModal} className="modal">
-                                    <div className="modal-box rounded-md p-10">
-                                        <h3 className="mb-5 text-xl font-medium">Add a new task</h3>
-                                        <label htmlFor="name" className="text-gray-500 text-sm">Task name</label>
-                                        <input 
-                                            name="name" 
-                                            type="text" 
-                                            className="input w-full rounded-md focus:outline-gray-800 block bg-gray-50 mb-5 mt-2" 
-                                            placeholder="Task name" 
-                                            value={newTaskTitle}
-                                            onChange={(e) => setNewTaskTitle(e.target.value)}
-                                        />
-                                        
-                                        <label htmlFor="description" className="text-gray-500 text-sm">Description</label>
-                                        <textarea 
-                                            name="description" 
-                                            className="textarea w-full rounded-md focus:outline-gray-800 block bg-gray-50 mb-5 mt-2" 
-                                            placeholder="Description"
-                                            value={newTaskDescription}
-                                            onChange={(e) => setNewTaskDescription(e.target.value)}
-                                        ></textarea>
-
-                                        <label htmlFor="category" className="text-gray-500 text-sm">Category</label>
-                                        <select 
-                                            name="category"  
-                                            className="select w-full rounded-md focus:outline-gray-800 bg-gray-50 mt-2"
-                                            onChange={(e) => setNewTaskCategory(e.target.value)}
-                                            value={newTaskCategory}
-                                        >
-                                            <option value={"uncategorized"}>Uncategorized</option>
-                                            <option value={"today"}>Today</option>
-                                            <option value={"important"}>Important</option>
-                                            <option value={"archived"}>Archived</option>
-                                        </select>
-
-                                        {hasError && 
-                                            <div role="alert" className="alert bg-red-50 text-red-700 border-none py-3 rounded-md mt-5">
-                                                <svg xmlns="http://www.w3.org/2000/svg" 
-                                                    className="stroke-current shrink-0 h-6 w-6" 
-                                                    fill="none" viewBox="0 0 24 24">
-                                                    <path 
-                                                        strokeLinecap="round" 
-                                                        strokeLinejoin="round" 
-                                                        strokeWidth="2" 
-                                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                </svg>
-                                                <span className="text-sm">Please ensure all fields are filled up to continue</span>
-                                            </div>
-                                        }
-
-                                        <div className="modal-action">
-                                            <form method="dialog">
-                                                <button 
-                                                    className="btn btn-sm bg-white hover:bg-slate-50 rounded-md font-medium mr-2 shadow-none"
-                                                    onClick={() => {
-                                                        setHasError(false);
-                                                        resetAddTask();
-                                                    }}
-                                                    >
-                                                        Cancel
-                                                </button>
-                                                <button 
-                                                    type="button" 
-                                                    className="btn btn-sm btn-neutral rounded-md text-white font-medium"
-                                                    onClick={addNewTaskData}
-                                                    >
-                                                    Add task
-                                                </button>
-                                            </form>
-                                        </div>
-                                        
-                                    </div>
-                                </dialog>
-
                             </div>
 
                         </div> 
+
+                        <AddTaskModal
+                            refreshTaskButton={refreshTaskButton}
+                        />
                         
                         <Sidebar
                             isActive={filterApplied}

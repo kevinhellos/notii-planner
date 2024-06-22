@@ -7,7 +7,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isActive}) => {
     return (
-        <div className="drawer-side shadow-md">
+        <div className="drawer-side">
             <label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label> 
             <ul className="menu p-4 w-72 min-h-full bg-gray-50 text-base-content">
                 <div className="mb-7 px-5 flex">
